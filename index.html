@@ -221,7 +221,10 @@ footer ul{padding-left:1.1rem;margin:.5rem 0 0;columns:2 16rem}
 .settle .big{display:block;font-family:Sora,sans-serif;font-size:2.2rem;font-weight:800;color:var(--navy);margin-top:.2rem;font-variant-numeric:tabular-nums}
 .settle p{margin:.4rem 0 0;color:var(--muted);font-size:.92rem}
 .xbal{table-layout:auto}
-.xbal th,.xbal td{padding:.6rem .55rem;font-size:.92rem}
+.xbal th,.xbal td{padding:.6rem .35rem;font-size:.86rem}
+.xbal th:first-child,.xbal td:first-child{padding-left:.65rem;width:31%}
+.xbal th:last-child,.xbal td:last-child{padding-right:.65rem}
+@media (max-width:400px){.xbal th,.xbal td{font-size:.78rem;padding:.55rem .25rem}.xbal th:first-child,.xbal td:first-child{width:27%;padding-left:.5rem}.xbal th:last-child,.xbal td:last-child{padding-right:.5rem}.xbal thead th{font-size:.72rem}}
 .xbal thead th{font-size:.82rem}
 .xbal tr.cpl td{background:var(--chip);font-weight:800;font-size:.86rem}
 .xbal td:first-child small{display:block;font-weight:600;color:var(--muted);font-size:.74rem;line-height:1.3;margin-top:.15rem}
@@ -234,16 +237,20 @@ details.xt ul{margin:.6rem 0 0;padding-left:1.1rem}
 .xcats span{font-size:.8rem;font-weight:700;background:var(--chip);border-radius:999px;padding:.15rem .65rem;color:var(--text)}
 .xh{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;margin:2rem 0 .7rem}
 .xh h3{font-size:1.25rem}
-.xlist{list-style:none;margin:0;padding:0;display:grid;gap:.6rem}
-.xitem{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:.8rem .95rem;display:grid;grid-template-columns:1fr auto;gap:.2rem .8rem;align-items:start}
-.xitem .w{font-weight:800;overflow-wrap:anywhere}
-.xitem small{display:block;color:var(--muted);font-size:.84rem;line-height:1.35}
-.xitem .a{text-align:right;font-family:Sora,sans-serif;font-weight:800;font-variant-numeric:tabular-nums}
-.xitem .a small{font-family:"Nunito Sans",sans-serif;font-weight:600}
-.xitem .act{grid-column:1/-1;display:flex;gap:1rem;padding-top:.15rem}
-.xitem .act button{background:none;border:0;padding:.2rem 0;font-weight:800;font-size:.86rem;color:var(--hi);cursor:pointer}
-.xitem .act button.del{color:var(--neg)}
-.xempty{color:var(--muted);padding:.6rem 0}
+.xtab{min-width:0;width:100%;table-layout:fixed}
+.xtab th:nth-child(1){width:42%}.xtab th:nth-child(2){width:22%}.xtab th:nth-child(3){width:24%}.xtab th:nth-child(4){width:12%}
+.xtab th,.xtab td{padding:.55rem .35rem;font-size:.84rem;vertical-align:top;overflow-wrap:break-word}
+.xtab th:first-child,.xtab td:first-child{padding-left:.65rem}
+.xtab th{font-size:.76rem;color:var(--muted)}
+.xtab td.w small{display:block;font-weight:600;color:var(--muted);font-size:.74rem;line-height:1.3;margin-top:.1rem}
+.xtab td.w small b{color:var(--text)}
+.xtab td.a{text-align:right;font-weight:800;font-variant-numeric:tabular-nums}
+.xtab th.a{text-align:right}
+.xtab td.act{text-align:center;padding:.3rem .2rem}
+.xtab td.act button{display:block;margin:0 auto;width:2rem;height:2rem;background:none;border:0;border-radius:8px;font-size:1rem;line-height:1;color:var(--hi);cursor:pointer}
+.xtab td.act button.del{color:var(--neg)}
+.xtab tfoot td{font-weight:800;border-top:2px solid var(--line);border-bottom:0;background:var(--chip)}
+.xtab td.xempty{color:var(--muted);text-align:center;padding:1.2rem .5rem;font-weight:600}
 .xtools{display:flex;flex-wrap:wrap;gap:.6rem;margin-top:1.4rem}
 .toast{border-radius:16px;text-align:center;max-width:calc(100vw - 2rem);width:max-content}
 .toast .tundo{background:none;border:0;color:var(--gold);font-weight:800;margin-left:.8rem;cursor:pointer;text-decoration:underline}
@@ -346,7 +353,13 @@ details.xt ul{margin:.6rem 0 0;padding-left:1.1rem}
     <div class="xcats" id="xcats"></div>
 
     <div class="xh"><h3>Expenses</h3><span class="fine" id="xcount"></span></div>
-    <ul class="xlist" id="xlist"></ul>
+    <div class="tablewrap">
+      <table class="xtab">
+        <thead><tr><th>Item</th><th>Paid by</th><th class="a">Amount</th><th></th></tr></thead>
+        <tbody id="xlist"></tbody>
+        <tfoot><tr><td colspan="2">Total</td><td class="a" id="xtot"></td><td></td></tr></tfoot>
+      </table>
+    </div>
 
     <div class="xtools">
       <button class="btn2" type="button" id="xlink">Copy link to share</button>
@@ -655,12 +668,14 @@ function renderX(){
   XCATS.forEach(function(c){if(R.cat[c])cats.appendChild(el("span",null,esc(c)+" "+mc(R.cat[c])));});
   var L=R.live.slice().sort(function(a,b){return a.d<b.d?1:a.d>b.d?-1:b.t-a.t;}),ul=document.getElementById("xlist");ul.innerHTML="";
   document.getElementById("xcount").textContent=L.length?L.length+(L.length===1?" item":" items"):"";
-  if(!L.length)ul.appendChild(el("li",{class:"xempty"},"Nothing yet."));
-  L.forEach(function(r){var li=el("li",{class:"xitem"},
-    '<div><span class="w">'+esc(r.w)+'</span><small>Paid by '+esc(PEOPLE[r.p])+' · '+esc(r.c)+' · '+esc(fmtDate(r.d))+esc(forText(r))+'</small></div>'+
-    '<div class="a">'+mc(r.a)+'<small>'+mc(Math.round(r.a/who(r).length))+' each</small></div>'+
-    '<div class="act"><button type="button" data-a="edit" data-id="'+esc(r.id)+'">Edit</button><button type="button" class="del" data-a="del" data-id="'+esc(r.id)+'">Delete</button></div>');
-    ul.appendChild(li);});
+  document.getElementById("xtot").textContent=mc(R.total);
+  if(!L.length)ul.appendChild(el("tr",null,'<td class="xempty" colspan="4">No expenses yet.</td>'));
+  L.forEach(function(r){var w=who(r),fr=w.length===4?"":'<br><b>For '+(w.length===3?"all but "+esc(PEOPLE[[0,1,2,3].filter(function(i){return w.indexOf(i)<0;})[0]]):esc(w.map(function(i){return PEOPLE[i];}).join(", ")))+'</b>';
+    ul.appendChild(el("tr",{class:"xitem"},
+    '<td class="w">'+esc(r.w)+'<small>'+esc(fmtDate(r.d))+' · '+esc(r.c)+fr+'</small></td>'+
+    '<td>'+esc(PEOPLE[r.p])+'</td>'+
+    '<td class="a">'+mc(r.a)+'</td>'+
+    '<td class="act"><button type="button" data-a="edit" aria-label="Edit '+esc(r.w)+'" title="Edit" data-id="'+esc(r.id)+'">&#9998;</button><button type="button" class="del" data-a="del" aria-label="Delete '+esc(r.w)+'" title="Delete" data-id="'+esc(r.id)+'">&#10005;</button></td>'));});
 }
 function findX(id){for(var i=0;i<X.length;i++)if(X[i].id===id)return X[i];return null;}
 
