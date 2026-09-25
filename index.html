@@ -233,8 +233,6 @@ footer ul{padding-left:1.1rem;margin:.5rem 0 0;columns:2 16rem}
 details.xt{margin:1rem 0 0}
 details.xt summary{cursor:pointer;font-weight:800;color:var(--hi)}
 details.xt ul{margin:.6rem 0 0;padding-left:1.1rem}
-.xcats{display:flex;flex-wrap:wrap;gap:.35rem;margin:1rem 0 0}
-.xcats span{font-size:.8rem;font-weight:700;background:var(--chip);border-radius:999px;padding:.15rem .65rem;color:var(--text)}
 .xh{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;margin:2rem 0 .7rem}
 .xh h3{font-size:1.25rem}
 .xtab{min-width:0;width:100%;table-layout:fixed}
@@ -321,17 +319,6 @@ details.xt ul{margin:.6rem 0 0;padding-left:1.1rem}
           <label class="wp"><input type="checkbox" name="s" value="3"><span>Gitanjali</span></label>
         </div>
       </fieldset>
-      <div>
-        <label class="f" for="xc">Category</label>
-        <select id="xc" name="c">
-          <option>Accommodation</option>
-          <option>Fuel &amp; tolls</option>
-          <option selected>Food &amp; drink</option>
-          <option>Groceries</option>
-          <option>Activities</option>
-          <option>Other</option>
-        </select>
-      </div>
       <p class="xprev" id="xprev" aria-live="polite"></p>
       <p class="xerr" id="xerr" role="alert"></p>
       <div class="xbtns">
@@ -350,7 +337,6 @@ details.xt ul{margin:.6rem 0 0;padding-left:1.1rem}
       </table>
     </div>
     <p class="fine" style="margin-top:.7rem">Plus means owed money, minus means owes.</p>
-    <div class="xcats" id="xcats"></div>
 
     <div class="xh"><h3>Expenses</h3><span class="fine" id="xcount"></span></div>
     <div class="tablewrap">
@@ -599,14 +585,13 @@ showDay("Saturday");
 
 /* Expenses: everything split equally four ways */
 var PEOPLE=["Manoj","Carol","Vignesh","Gitanjali"],COUPLES=[[0,1],[2,3]],CNAME=["Manoj & Carol","Vignesh & Gitanjali"];
-var XCATS=["Accommodation","Fuel & tolls","Food & drink","Groceries","Activities","Other"];
 var XKEY="pm26-expenses-v1",PKEY="pm26-payer";
 function lsGet(k){try{return localStorage.getItem(k);}catch(e){return null;}}
 function lsSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
 function pad(n){return n<10?"0"+n:""+n;}
 function today(){var d=new Date();return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());}
 function validX(r){return !!r&&typeof r.id==="string"&&r.id.length<40&&typeof r.w==="string"&&Number.isInteger(r.a)&&r.a>0&&r.a<1e9&&Number.isInteger(r.p)&&r.p>=0&&r.p<4&&typeof r.t==="number"&&(r.s===undefined||(Number.isInteger(r.s)&&r.s>=1&&r.s<=15));}
-function cleanX(r){return {id:r.id,w:r.w.slice(0,80),a:r.a,p:r.p,c:XCATS.indexOf(r.c)>-1?r.c:"Other",d:/^\d{4}-\d{2}-\d{2}$/.test(r.d||"")?r.d:today(),t:r.t,del:!!r.del,s:r.s||15};}
+function cleanX(r){return {id:r.id,w:r.w.slice(0,80),a:r.a,p:r.p,c:"Other",d:/^\d{4}-\d{2}-\d{2}$/.test(r.d||"")?r.d:today(),t:r.t,del:!!r.del,s:r.s||15};}
 var X=[];
 try{var raw=JSON.parse(lsGet(XKEY)||"[]");if(Array.isArray(raw))X=raw.filter(validX).map(cleanX);}catch(e){X=[];}
 function saveX(){lsSet(XKEY,JSON.stringify(X));}
@@ -624,7 +609,7 @@ function who(r){var m=r.s||15,o=[];for(var i=0;i<4;i++)if(m>>i&1)o.push(i);retur
 function shares(r){var w=who(r),n=w.length,base=Math.floor(r.a/n),rem=r.a%n,off=hashId(r.id)%n,out=[0,0,0,0];w.forEach(function(pi,k){out[pi]=base+(((k-off+n)%n)<rem?1:0);});return out;}
 function forText(r){var w=who(r);return w.length===4?"":" · For "+w.map(function(i){return PEOPLE[i];}).join(", ");}
 function calcX(){var live=X.filter(function(r){return !r.del;}),paid=[0,0,0,0],owed=[0,0,0,0],total=0,cat={};
-  live.forEach(function(r){total+=r.a;paid[r.p]+=r.a;var s=shares(r);for(var i=0;i<4;i++)owed[i]+=s[i];cat[r.c]=(cat[r.c]||0)+r.a;});
+  live.forEach(function(r){total+=r.a;paid[r.p]+=r.a;var s=shares(r);for(var i=0;i<4;i++)owed[i]+=s[i];});
   return {live:live,paid:paid,owed:owed,net:paid.map(function(p,i){return p-owed[i];}),total:total,cat:cat};}
 function fmtDate(s){var p=s.split("-");return new Date(+p[0],+p[1]-1,+p[2]).toLocaleDateString("en-AU",{weekday:"short",day:"numeric",month:"short"});}
 function balCell(v){return v>0?'<span class="pos">+'+mc(v)+'</span>':v<0?'<span class="neg">'+mc(v)+'</span>':"$0.00";}
@@ -664,15 +649,13 @@ function renderX(){
   var tb=document.getElementById("xbal");tb.innerHTML="";
   COUPLES.forEach(function(c,ci){var p=R.paid[c[0]]+R.paid[c[1]],o=R.owed[c[0]]+R.owed[c[1]];
     tb.appendChild(el("tr",null,"<td>"+esc(CNAME[ci])+"</td><td>"+mc(p)+"</td><td>"+mc(o)+"</td><td>"+balCell(p-o)+"</td>"));});
-  var cats=document.getElementById("xcats");cats.innerHTML="";
-  XCATS.forEach(function(c){if(R.cat[c])cats.appendChild(el("span",null,esc(c)+" "+mc(R.cat[c])));});
   var L=R.live.slice().sort(function(a,b){return a.d<b.d?1:a.d>b.d?-1:b.t-a.t;}),ul=document.getElementById("xlist");ul.innerHTML="";
   document.getElementById("xcount").textContent=L.length?L.length+(L.length===1?" item":" items"):"";
   document.getElementById("xtot").textContent=mc(R.total);
   if(!L.length)ul.appendChild(el("tr",null,'<td class="xempty" colspan="4">No expenses yet.</td>'));
   L.forEach(function(r){var w=who(r),fr=w.length===4?"":'<br><b>For '+(w.length===3?"all but "+esc(PEOPLE[[0,1,2,3].filter(function(i){return w.indexOf(i)<0;})[0]]):esc(w.map(function(i){return PEOPLE[i];}).join(", ")))+'</b>';
     ul.appendChild(el("tr",{class:"xitem"},
-    '<td class="w">'+esc(r.w)+'<small>'+esc(fmtDate(r.d))+' · '+esc(r.c)+fr+'</small></td>'+
+    '<td class="w">'+esc(r.w)+'<small>'+esc(fmtDate(r.d))+fr+'</small></td>'+
     '<td>'+esc(PEOPLE[r.p])+'</td>'+
     '<td class="a">'+mc(r.a)+'</td>'+
     '<td class="act"><button type="button" data-a="edit" aria-label="Edit '+esc(r.w)+'" title="Edit" data-id="'+esc(r.id)+'">&#9998;</button><button type="button" class="del" data-a="del" aria-label="Delete '+esc(r.w)+'" title="Delete" data-id="'+esc(r.id)+'">&#10005;</button></td>'));});
@@ -680,7 +663,7 @@ function renderX(){
 function findX(id){for(var i=0;i<X.length;i++)if(X[i].id===id)return X[i];return null;}
 
 xf.addEventListener("submit",function(e){e.preventDefault();
-  var w=xf.w.value.trim(),a=parseAmt(xf.a.value),p=payerVal(),c=xf.c.value,d=xf.d.value||today(),sm=splitMask();
+  var w=xf.w.value.trim(),a=parseAmt(xf.a.value),p=payerVal(),c="Other",d=xf.d.value||today(),sm=splitMask();
   if(!w){xerr.textContent="Add a short description.";xf.w.focus();return;}
   if(a===null){xerr.textContent="Enter the amount as a number, like 606.40.";xf.a.focus();return;}
   if(p===null){xerr.textContent="Pick who paid.";return;}
@@ -692,7 +675,7 @@ xf.addEventListener("submit",function(e){e.preventDefault();
 xcancel.addEventListener("click",function(){resetForm();});
 document.getElementById("xlist").addEventListener("click",function(e){
   var b=e.target.closest("button[data-a]");if(!b)return;var r=findX(b.getAttribute("data-id"));if(!r)return;
-  if(b.getAttribute("data-a")==="edit"){editing=r.id;xf.w.value=r.w;xf.a.value=(r.a/100).toFixed(2);xf.d.value=r.d;xf.c.value=r.c;setPayer(r.p);setSplit(r.s||15);preview();xerr.textContent="";xsubmit.textContent="Save changes";xcancel.hidden=false;xf.scrollIntoView({behavior:"smooth",block:"center"});xf.w.focus({preventScroll:true});}
+  if(b.getAttribute("data-a")==="edit"){editing=r.id;xf.w.value=r.w;xf.a.value=(r.a/100).toFixed(2);xf.d.value=r.d;setPayer(r.p);setSplit(r.s||15);preview();xerr.textContent="";xsubmit.textContent="Save changes";xcancel.hidden=false;xf.scrollIntoView({behavior:"smooth",block:"center"});xf.w.focus({preventScroll:true});}
   else{r.del=true;r.t=Date.now();if(editing===r.id)resetForm();saveX();renderX();toast("Deleted "+r.w,"Undo",function(){r.del=false;r.t=Date.now();saveX();renderX();});}});
 
 function summaryText(){var R=calcX(),cn=[R.net[0]+R.net[1],R.net[2]+R.net[3]],st=settleLine(cn,R),t=["Port Macquarie, 3-5 Oct 2026: expenses","Total "+mc(R.total),""];
