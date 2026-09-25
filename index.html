@@ -261,25 +261,6 @@ details.xt ul{margin:.6rem 0 0;padding-left:1.1rem}
   </div>
 </nav>
 
-<header class="hero" id="top">
-  <div class="wrap">
-    <span class="script">October long weekend · Sat 3 – Mon 5 Oct 2026</span>
-    <h1>Port<span>Macquarie</span></h1>
-    <div class="guests"><span>Gitanjali</span><span>Vignesh</span><span>Carol</span><span>Manoj</span></div>
-    <p class="sub">Two nights, eight beaches, eleven pubs and bars, and a free festival the day we arrive.</p>
-    <div class="count" id="count" aria-live="off">
-      <div class="u"><b id="cd-d">--</b><small>days</small></div>
-      <div class="u"><b id="cd-h">--</b><small>hours</small></div>
-      <div class="u"><b id="cd-m">--</b><small>mins</small></div>
-      <span class="cap">until we leave, Saturday 10 am</span>
-    </div>
-    <div class="btns">
-      <a class="cta" href="#expenses">Split expenses</a>
-      <a class="ghost" href="#plan">Weekend plan</a>
-    </div>
-  </div>
-</header>
-
 <main>
 <section id="expenses">
   <div class="wrap">
@@ -697,13 +678,6 @@ function importHash(){
 }
 importHash();
 window.addEventListener("hashchange",importHash);
-
-/* Countdown: Sat 3 Oct 2026 10:00 AEST (UTC+10) */
-var target=Date.UTC(2026,9,3,0,0,0);
-function tick(){var ms=target-Date.now();var c=document.getElementById("count");
-  if(ms<=0){c.innerHTML='<span class="cap" style="margin:0;font-weight:800;color:#fff">We\'re on the road. See you in Port Mac.</span>';return;}
-  var m=Math.floor(ms/60000);document.getElementById("cd-d").textContent=Math.floor(m/1440);document.getElementById("cd-h").textContent=Math.floor(m%1440/60);document.getElementById("cd-m").textContent=m%60;}
-tick();setInterval(tick,30000);
 
 /* Init */
 var reduce=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
