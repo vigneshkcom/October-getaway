@@ -207,7 +207,7 @@ footer ul{padding-left:1.1rem;margin:.5rem 0 0;columns:2 16rem}
 .btn2.warn{color:var(--neg)}
 .xerr{margin:0;color:var(--neg);font-weight:700;font-size:.92rem;min-height:0}
 .xerr:empty{display:none}
-.xstats{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;margin-bottom:1rem}
+.xstats{display:grid;grid-template-columns:repeat(2,1fr);gap:.6rem;margin-bottom:1rem}
 .xstats div{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:.75rem .5rem;text-align:center;line-height:1.2}
 .xstats small{display:block;color:var(--muted);font-size:.74rem;font-weight:800}
 .xstats b{display:block;font-family:Sora,sans-serif;font-size:1.05rem;font-variant-numeric:tabular-nums;margin-top:.15rem}
@@ -266,11 +266,11 @@ details.xt ul{margin:.6rem 0 0;padding-left:1.1rem}
   <div class="wrap">
     <div class="narrow reveal">
       <h2>Split the costs</h2>
-      <p class="lede">Everything is split four ways, 25% each. Add what was paid and who paid it, and the balances update as you go.</p>
+      <p class="lede">Add what was paid and who paid. Split four ways by default.</p>
     </div>
     <div class="xpeople" aria-label="Who is splitting">
-      <div class="xcouple"><small>Couple</small><b>Manoj &amp; Carol</b></div>
-      <div class="xcouple"><small>Couple</small><b>Vignesh &amp; Gitanjali</b></div>
+      <div class="xcouple"><b>Manoj &amp; Carol</b></div>
+      <div class="xcouple"><b>Vignesh &amp; Gitanjali</b></div>
     </div>
 
     <form class="xform" id="xf" autocomplete="off" novalidate>
@@ -297,6 +297,16 @@ details.xt ul{margin:.6rem 0 0;padding-left:1.1rem}
           <label class="wp"><input type="radio" name="p" value="3"><span>Gitanjali</span></label>
         </div>
       </fieldset>
+      <fieldset>
+        <legend>Split between</legend>
+        <div class="who">
+          <label class="wp"><input type="checkbox" name="s" value="0" checked><span>Manoj</span></label>
+          <label class="wp"><input type="checkbox" name="s" value="1" checked><span>Carol</span></label>
+          <label class="wp"><input type="checkbox" name="s" value="2" checked><span>Vignesh</span></label>
+          <label class="wp"><input type="checkbox" name="s" value="3" checked><span>Gitanjali</span></label>
+        </div>
+        <p class="fine" style="margin:.4rem 0 0">Everyone by default. Untick people who weren't part of it, e.g. leave only Manoj ticked if you paid for him.</p>
+      </fieldset>
       <div>
         <label class="f" for="xc">Category</label>
         <select id="xc" name="c">
@@ -320,11 +330,11 @@ details.xt ul{margin:.6rem 0 0;padding-left:1.1rem}
 
     <div class="tablewrap">
       <table class="num xbal">
-        <thead><tr><th>Couple</th><th>Paid</th><th>Share</th><th>Balance</th></tr></thead>
+        <thead><tr><th></th><th>Paid</th><th>Share</th><th>Balance</th></tr></thead>
         <tbody id="xbal"></tbody>
       </table>
     </div>
-    <p class="fine" style="margin-top:.7rem">Each couple counts as one: Balance is what the couple paid minus its half of the total (two quarters). Plus means they're owed money, minus means they owe.</p>
+    <p class="fine" style="margin-top:.7rem">Plus means owed money, minus means owes.</p>
     <div class="xcats" id="xcats"></div>
 
     <div class="xh"><h3>Expenses</h3><span class="fine" id="xcount"></span></div>
@@ -574,8 +584,8 @@ function lsGet(k){try{return localStorage.getItem(k);}catch(e){return null;}}
 function lsSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
 function pad(n){return n<10?"0"+n:""+n;}
 function today(){var d=new Date();return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());}
-function validX(r){return !!r&&typeof r.id==="string"&&r.id.length<40&&typeof r.w==="string"&&Number.isInteger(r.a)&&r.a>0&&r.a<1e9&&Number.isInteger(r.p)&&r.p>=0&&r.p<4&&typeof r.t==="number";}
-function cleanX(r){return {id:r.id,w:r.w.slice(0,80),a:r.a,p:r.p,c:XCATS.indexOf(r.c)>-1?r.c:"Other",d:/^\d{4}-\d{2}-\d{2}$/.test(r.d||"")?r.d:today(),t:r.t,del:!!r.del};}
+function validX(r){return !!r&&typeof r.id==="string"&&r.id.length<40&&typeof r.w==="string"&&Number.isInteger(r.a)&&r.a>0&&r.a<1e9&&Number.isInteger(r.p)&&r.p>=0&&r.p<4&&typeof r.t==="number"&&(r.s===undefined||(Number.isInteger(r.s)&&r.s>=1&&r.s<=15));}
+function cleanX(r){return {id:r.id,w:r.w.slice(0,80),a:r.a,p:r.p,c:XCATS.indexOf(r.c)>-1?r.c:"Other",d:/^\d{4}-\d{2}-\d{2}$/.test(r.d||"")?r.d:today(),t:r.t,del:!!r.del,s:r.s||15};}
 var X=[];
 try{var raw=JSON.parse(lsGet(XKEY)||"[]");if(Array.isArray(raw))X=raw.filter(validX).map(cleanX);}catch(e){X=[];}
 function saveX(){lsSet(XKEY,JSON.stringify(X));}
@@ -589,7 +599,9 @@ function mc(c){var neg=c<0;c=Math.abs(c);return (neg?"-":"")+"$"+(c/100).toLocal
 function parseAmt(v){v=String(v).replace(/[$,\s]/g,"");if(!/^\d+(\.\d{1,2})?$/.test(v))return null;var c=Math.round(parseFloat(v)*100);return c>0&&c<1e9?c:null;}
 function hashId(id){var h=0;for(var i=0;i<id.length;i++)h=(h*31+id.charCodeAt(i))>>>0;return h;}
 /* Exact split in cents: leftover cents go to different people per expense so nobody is always the one rounded up */
-function shares(r){var base=Math.floor(r.a/4),rem=r.a%4,off=hashId(r.id)%4,s=[base,base,base,base];for(var j=0;j<rem;j++)s[(off+j)%4]++;return s;}
+function who(r){var m=r.s||15,o=[];for(var i=0;i<4;i++)if(m>>i&1)o.push(i);return o;}
+function shares(r){var w=who(r),n=w.length,base=Math.floor(r.a/n),rem=r.a%n,off=hashId(r.id)%n,out=[0,0,0,0];w.forEach(function(pi,k){out[pi]=base+(((k-off+n)%n)<rem?1:0);});return out;}
+function forText(r){var w=who(r);return w.length===4?"":" · For "+w.map(function(i){return PEOPLE[i];}).join(", ");}
 function calcX(){var live=X.filter(function(r){return !r.del;}),paid=[0,0,0,0],owed=[0,0,0,0],total=0,cat={};
   live.forEach(function(r){total+=r.a;paid[r.p]+=r.a;var s=shares(r);for(var i=0;i<4;i++)owed[i]+=s[i];cat[r.c]=(cat[r.c]||0)+r.a;});
   return {live:live,paid:paid,owed:owed,net:paid.map(function(p,i){return p-owed[i];}),total:total,cat:cat};}
@@ -600,7 +612,9 @@ function settleLine(cn,R){if(!cn[0])return null;var from=cn[0]<0?0:1,c=COUPLES[1
 var xf=document.getElementById("xf"),xerr=document.getElementById("xerr"),xsubmit=document.getElementById("xsubmit"),xcancel=document.getElementById("xcancel"),editing=null;
 function payerVal(){var c=xf.querySelector('input[name="p"]:checked');return c?+c.value:null;}
 function setPayer(i){var r=xf.querySelectorAll('input[name="p"]');Array.prototype.forEach.call(r,function(x){x.checked=(+x.value===i);});}
-function resetForm(){editing=null;xf.w.value="";xf.a.value="";xerr.textContent="";xsubmit.textContent="Add expense";xcancel.hidden=true;}
+function splitMask(){var m=0;Array.prototype.forEach.call(xf.querySelectorAll('input[name="s"]:checked'),function(x){m|=1<<(+x.value);});return m;}
+function setSplit(m){Array.prototype.forEach.call(xf.querySelectorAll('input[name="s"]'),function(x){x.checked=!!(m>>(+x.value)&1);});}
+function resetForm(){setSplit(15);editing=null;xf.w.value="";xf.a.value="";xerr.textContent="";xsubmit.textContent="Add expense";xcancel.hidden=true;}
 xf.d.value=today();
 var lastP=lsGet(PKEY);if(lastP!==null&&/^[0-3]$/.test(lastP))setPayer(+lastP);
 
@@ -615,46 +629,47 @@ function copyText(t,ok){
 
 function renderX(){
   var R=calcX(),cn=[R.net[0]+R.net[1],R.net[2]+R.net[3]];
-  document.getElementById("xstats").innerHTML='<div><small>Trip total</small><b>'+mc(R.total)+'</b></div><div><small>Per person</small><b>'+mc(Math.round(R.total/4))+'</b></div><div><small>Per couple</small><b>'+mc(Math.round(R.total/2))+'</b></div>';
+  document.getElementById("xstats").innerHTML='<div><small>Trip total</small><b>'+mc(R.total)+'</b></div><div><small>Per person</small><b>'+mc(Math.round(R.total/4))+'</b></div>';
   var st=settleLine(cn,R),sb=document.getElementById("settle");
   sb.innerHTML=!R.live.length?'<small>Settle up</small><b>Nothing logged yet</b><p>Add the first expense above.</p>':
     !st?'<small>Settle up</small><b>All square</b><p>Nobody owes anybody.</p>':
-    '<small>Settle up</small><b>'+esc(st.from)+' pay '+esc(st.to)+'</b><span class="big">'+mc(st.amt)+'</span><p>Couples settle as one, so nothing is owed inside a couple.</p>';
+    '<small>Settle up</small><b>'+esc(st.from)+' pay '+esc(st.to)+'</b><span class="big">'+mc(st.amt)+'</span>';
   var tb=document.getElementById("xbal");tb.innerHTML="";
   COUPLES.forEach(function(c,ci){var p=R.paid[c[0]]+R.paid[c[1]],o=R.owed[c[0]]+R.owed[c[1]];
-    tb.appendChild(el("tr",null,"<td>"+esc(CNAME[ci])+"<small>"+esc(PEOPLE[c[0]])+" "+mc(R.paid[c[0]])+" · "+esc(PEOPLE[c[1]])+" "+mc(R.paid[c[1]])+"</small></td><td>"+mc(p)+"</td><td>"+mc(o)+"</td><td>"+balCell(p-o)+"</td>"));});
+    tb.appendChild(el("tr",null,"<td>"+esc(CNAME[ci])+"</td><td>"+mc(p)+"</td><td>"+mc(o)+"</td><td>"+balCell(p-o)+"</td>"));});
   var cats=document.getElementById("xcats");cats.innerHTML="";
   XCATS.forEach(function(c){if(R.cat[c])cats.appendChild(el("span",null,esc(c)+" "+mc(R.cat[c])));});
   var L=R.live.slice().sort(function(a,b){return a.d<b.d?1:a.d>b.d?-1:b.t-a.t;}),ul=document.getElementById("xlist");ul.innerHTML="";
   document.getElementById("xcount").textContent=L.length?L.length+(L.length===1?" item":" items"):"";
   if(!L.length)ul.appendChild(el("li",{class:"xempty"},"Nothing yet."));
   L.forEach(function(r){var li=el("li",{class:"xitem"},
-    '<div><span class="w">'+esc(r.w)+'</span><small>Paid by '+esc(PEOPLE[r.p])+' · '+esc(r.c)+' · '+esc(fmtDate(r.d))+'</small></div>'+
-    '<div class="a">'+mc(r.a)+'<small>'+mc(Math.round(r.a/4))+' each</small></div>'+
+    '<div><span class="w">'+esc(r.w)+'</span><small>Paid by '+esc(PEOPLE[r.p])+' · '+esc(r.c)+' · '+esc(fmtDate(r.d))+esc(forText(r))+'</small></div>'+
+    '<div class="a">'+mc(r.a)+'<small>'+mc(Math.round(r.a/who(r).length))+' each</small></div>'+
     '<div class="act"><button type="button" data-a="edit" data-id="'+esc(r.id)+'">Edit</button><button type="button" class="del" data-a="del" data-id="'+esc(r.id)+'">Delete</button></div>');
     ul.appendChild(li);});
 }
 function findX(id){for(var i=0;i<X.length;i++)if(X[i].id===id)return X[i];return null;}
 
 xf.addEventListener("submit",function(e){e.preventDefault();
-  var w=xf.w.value.trim(),a=parseAmt(xf.a.value),p=payerVal(),c=xf.c.value,d=xf.d.value||today();
+  var w=xf.w.value.trim(),a=parseAmt(xf.a.value),p=payerVal(),c=xf.c.value,d=xf.d.value||today(),sm=splitMask();
   if(!w){xerr.textContent="Add a short description.";xf.w.focus();return;}
   if(a===null){xerr.textContent="Enter the amount as a number, like 606.40.";xf.a.focus();return;}
   if(p===null){xerr.textContent="Pick who paid.";return;}
+  if(!sm){xerr.textContent="Pick at least one person to split between.";return;}
   xerr.textContent="";
-  if(editing){var r=findX(editing);if(r){r.w=w;r.a=a;r.p=p;r.c=c;r.d=d;r.t=Date.now();}toast("Saved changes");}
-  else{X.push({id:uid(),w:w,a:a,p:p,c:c,d:d,t:Date.now(),del:false});toast("Added "+mc(a)+" paid by "+PEOPLE[p]);}
+  if(editing){var r=findX(editing);if(r){r.w=w;r.a=a;r.p=p;r.c=c;r.d=d;r.s=sm;r.t=Date.now();}toast("Saved changes");}
+  else{X.push({id:uid(),w:w,a:a,p:p,c:c,d:d,s:sm,t:Date.now(),del:false});toast("Added "+mc(a)+" paid by "+PEOPLE[p]);}
   lsSet(PKEY,String(p));saveX();resetForm();renderX();xf.w.focus();});
 xcancel.addEventListener("click",function(){resetForm();});
 document.getElementById("xlist").addEventListener("click",function(e){
   var b=e.target.closest("button[data-a]");if(!b)return;var r=findX(b.getAttribute("data-id"));if(!r)return;
-  if(b.getAttribute("data-a")==="edit"){editing=r.id;xf.w.value=r.w;xf.a.value=(r.a/100).toFixed(2);xf.d.value=r.d;xf.c.value=r.c;setPayer(r.p);xerr.textContent="";xsubmit.textContent="Save changes";xcancel.hidden=false;xf.scrollIntoView({behavior:"smooth",block:"center"});xf.w.focus({preventScroll:true});}
+  if(b.getAttribute("data-a")==="edit"){editing=r.id;xf.w.value=r.w;xf.a.value=(r.a/100).toFixed(2);xf.d.value=r.d;xf.c.value=r.c;setPayer(r.p);setSplit(r.s||15);xerr.textContent="";xsubmit.textContent="Save changes";xcancel.hidden=false;xf.scrollIntoView({behavior:"smooth",block:"center"});xf.w.focus({preventScroll:true});}
   else{r.del=true;r.t=Date.now();if(editing===r.id)resetForm();saveX();renderX();toast("Deleted "+r.w,"Undo",function(){r.del=false;r.t=Date.now();saveX();renderX();});}});
 
-function summaryText(){var R=calcX(),cn=[R.net[0]+R.net[1],R.net[2]+R.net[3]],st=settleLine(cn,R),t=["Port Macquarie, 3-5 Oct 2026: expenses","Total "+mc(R.total)+", "+mc(Math.round(R.total/4))+" each (split 4 ways)",""];
+function summaryText(){var R=calcX(),cn=[R.net[0]+R.net[1],R.net[2]+R.net[3]],st=settleLine(cn,R),t=["Port Macquarie, 3-5 Oct 2026: expenses","Total "+mc(R.total),""];
   t.push(st?st.from+" pay "+st.to+" "+mc(st.amt):"All square");t.push("");
   t.push("Paid so far: "+PEOPLE.map(function(n,i){return n+" "+mc(R.paid[i]);}).join(", "));t.push("");
-  R.live.slice().sort(function(a,b){return a.d<b.d?-1:a.d>b.d?1:a.t-b.t;}).forEach(function(r){t.push("- "+fmtDate(r.d)+": "+r.w+" "+mc(r.a)+" ("+PEOPLE[r.p]+")");});
+  R.live.slice().sort(function(a,b){return a.d<b.d?-1:a.d>b.d?1:a.t-b.t;}).forEach(function(r){t.push("- "+fmtDate(r.d)+": "+r.w+" "+mc(r.a)+" ("+PEOPLE[r.p]+forText(r).replace(" · For "," for ")+")");});
   return t.join("\n");}
 function b64e(str){var b=new TextEncoder().encode(str),s="";for(var i=0;i<b.length;i++)s+=String.fromCharCode(b[i]);return btoa(s).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");}
 function b64d(t){t=t.replace(/-/g,"+").replace(/_/g,"/");while(t.length%4)t+="=";var s=atob(t),b=new Uint8Array(s.length);for(var i=0;i<s.length;i++)b[i]=s.charCodeAt(i);return new TextDecoder().decode(b);}
