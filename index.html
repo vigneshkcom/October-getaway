@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
+<meta name="color-scheme" content="light">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Port Macquarie long weekend · 3–5 Oct 2026</title>
 <meta name="description" content="Port Macquarie long weekend, 3–5 October 2026. Where we're staying, every beach, pub and restaurant, the weekend plan, and a shared expense splitter for the four of us.">
@@ -15,7 +16,7 @@
 :root{
   --navy:#0b3350; --deep:#06202f; --teal:#138aa0; --gold:#f2b632; --coral:#ef7a5d;
   --bg:#ffffff; --bg2:#f2f8f9; --text:#12293a; --muted:#546a79; --card:#ffffff; --line:#dbe7ea;
-  --neg:#b93b1f; --hi:#138aa0; --chip:#e8f4f6; --aqua:#e2f4f6; --yes:#13916b; --no:#c7d3d8;
+  --neg:#b93b1f; --sel:#0e7385; --hi:#138aa0; --chip:#e8f4f6; --aqua:#e2f4f6; --yes:#13916b; --no:#c7d3d8;
   --shadow:0 1px 2px rgba(11,51,80,.06),0 8px 24px rgba(11,51,80,.09);
   box-sizing:border-box;
   padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
@@ -185,7 +186,7 @@ footer ul{padding-left:1.1rem;margin:.5rem 0 0;columns:2 16rem}
 
 /* Expenses */
 .xpeople{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin:1.3rem 0}
-.xcouple{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:.7rem .9rem;box-shadow:var(--shadow);line-height:1.3}
+.xcouple{background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:.7rem .9rem;box-shadow:var(--shadow);line-height:1.3}
 .xcouple small{display:block;color:var(--muted);font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;margin-bottom:.15rem}
 .xcouple b{font-family:Sora,sans-serif;font-size:.98rem}
 .xform{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:1.1rem;box-shadow:var(--shadow);display:grid;gap:.85rem;margin-bottom:1.6rem}
@@ -198,8 +199,8 @@ footer ul{padding-left:1.1rem;margin:.5rem 0 0;columns:2 16rem}
 .wp input{position:absolute;opacity:0;inset:0;width:100%;height:100%;margin:0;cursor:pointer}
 .wp span{display:block;text-align:center;font-weight:800;padding:.6rem .5rem;border-radius:12px;border:2px solid var(--line);background:var(--bg);color:var(--text)}
 .wp small{display:block;font-weight:600;font-size:.72rem;color:var(--muted)}
-.wp input:checked+span{background:var(--navy);border-color:var(--navy);color:#fff}
-.wp input:checked+span small{color:#b9cfd9}
+.wp input:checked+span{background:var(--sel);border-color:var(--sel);color:#fff}
+.wp input:checked+span small{color:#e3eef3}
 .wp input:focus-visible+span{outline:3px solid var(--gold);outline-offset:2px}
 .xbtns{display:flex;gap:.6rem;flex-wrap:wrap}
 .xform .cta{flex:1 1 auto;justify-content:center}
@@ -207,15 +208,18 @@ footer ul{padding-left:1.1rem;margin:.5rem 0 0;columns:2 16rem}
 .btn2.warn{color:var(--neg)}
 .xerr{margin:0;color:var(--neg);font-weight:700;font-size:.92rem;min-height:0}
 .xerr:empty{display:none}
+[hidden]{display:none!important}
+.xprev{margin:0;padding:.7rem .9rem;border-radius:12px;background:var(--aqua);font-weight:700;font-size:.95rem}
+.xprev:empty{display:none}
 .xstats{display:grid;grid-template-columns:repeat(2,1fr);gap:.6rem;margin-bottom:1rem}
 .xstats div{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:.75rem .5rem;text-align:center;line-height:1.2}
 .xstats small{display:block;color:var(--muted);font-size:.74rem;font-weight:800}
 .xstats b{display:block;font-family:Sora,sans-serif;font-size:1.05rem;font-variant-numeric:tabular-nums;margin-top:.15rem}
-.settle{background:var(--navy);color:#fff;border-radius:16px;padding:1.2rem 1.3rem;margin-bottom:1.2rem}
-.settle small{display:block;color:#b9cfd9;font-weight:800;font-size:.76rem;letter-spacing:.06em;text-transform:uppercase;margin-bottom:.3rem}
+.settle{background:var(--aqua);border:2px solid var(--teal);color:var(--text);border-radius:16px;padding:1.2rem 1.3rem;margin-bottom:1.2rem}
+.settle small{display:block;color:var(--muted);font-weight:800;font-size:.76rem;letter-spacing:.06em;text-transform:uppercase;margin-bottom:.3rem}
 .settle b{display:block;font-family:Sora,sans-serif;font-size:1.15rem;line-height:1.3}
-.settle .big{display:block;font-family:Sora,sans-serif;font-size:2.2rem;font-weight:800;color:var(--gold);margin-top:.2rem;font-variant-numeric:tabular-nums}
-.settle p{margin:.4rem 0 0;color:#d4e4ea;font-size:.92rem}
+.settle .big{display:block;font-family:Sora,sans-serif;font-size:2.2rem;font-weight:800;color:var(--navy);margin-top:.2rem;font-variant-numeric:tabular-nums}
+.settle p{margin:.4rem 0 0;color:var(--muted);font-size:.92rem}
 .xbal{table-layout:auto}
 .xbal th,.xbal td{padding:.6rem .55rem;font-size:.92rem}
 .xbal thead th{font-size:.82rem}
@@ -298,14 +302,17 @@ details.xt ul{margin:.6rem 0 0;padding-left:1.1rem}
         </div>
       </fieldset>
       <fieldset>
-        <legend>Split between</legend>
+        <legend>Who is it for?</legend>
         <div class="who">
-          <label class="wp"><input type="checkbox" name="s" value="0" checked><span>Manoj</span></label>
-          <label class="wp"><input type="checkbox" name="s" value="1" checked><span>Carol</span></label>
-          <label class="wp"><input type="checkbox" name="s" value="2" checked><span>Vignesh</span></label>
-          <label class="wp"><input type="checkbox" name="s" value="3" checked><span>Gitanjali</span></label>
+          <label class="wp"><input type="radio" name="mode" value="all" checked><span>Everyone<small>split 4 ways</small></span></label>
+          <label class="wp"><input type="radio" name="mode" value="some"><span>Only some<small>pick who</small></span></label>
         </div>
-        <p class="fine" style="margin:.4rem 0 0">Everyone by default. Untick people who weren't part of it, e.g. leave only Manoj ticked if you paid for him.</p>
+        <div class="who" id="xsplit" hidden style="margin-top:.45rem">
+          <label class="wp"><input type="checkbox" name="s" value="0"><span>Manoj</span></label>
+          <label class="wp"><input type="checkbox" name="s" value="1"><span>Carol</span></label>
+          <label class="wp"><input type="checkbox" name="s" value="2"><span>Vignesh</span></label>
+          <label class="wp"><input type="checkbox" name="s" value="3"><span>Gitanjali</span></label>
+        </div>
       </fieldset>
       <div>
         <label class="f" for="xc">Category</label>
@@ -318,6 +325,7 @@ details.xt ul{margin:.6rem 0 0;padding-left:1.1rem}
           <option>Other</option>
         </select>
       </div>
+      <p class="xprev" id="xprev" aria-live="polite"></p>
       <p class="xerr" id="xerr" role="alert"></p>
       <div class="xbtns">
         <button class="cta" type="submit" id="xsubmit">Add expense</button>
@@ -612,9 +620,15 @@ function settleLine(cn,R){if(!cn[0])return null;var from=cn[0]<0?0:1,c=COUPLES[1
 var xf=document.getElementById("xf"),xerr=document.getElementById("xerr"),xsubmit=document.getElementById("xsubmit"),xcancel=document.getElementById("xcancel"),editing=null;
 function payerVal(){var c=xf.querySelector('input[name="p"]:checked');return c?+c.value:null;}
 function setPayer(i){var r=xf.querySelectorAll('input[name="p"]');Array.prototype.forEach.call(r,function(x){x.checked=(+x.value===i);});}
-function splitMask(){var m=0;Array.prototype.forEach.call(xf.querySelectorAll('input[name="s"]:checked'),function(x){m|=1<<(+x.value);});return m;}
-function setSplit(m){Array.prototype.forEach.call(xf.querySelectorAll('input[name="s"]'),function(x){x.checked=!!(m>>(+x.value)&1);});}
-function resetForm(){setSplit(15);editing=null;xf.w.value="";xf.a.value="";xerr.textContent="";xsubmit.textContent="Add expense";xcancel.hidden=true;}
+function splitMask(){if(xf.querySelector('input[name="mode"]:checked').value==="all")return 15;var m=0;Array.prototype.forEach.call(xf.querySelectorAll('input[name="s"]:checked'),function(x){m|=1<<(+x.value);});return m;}
+function setSplit(m){var all=(m===15);xf.querySelector('input[name="mode"][value="'+(all?"all":"some")+'"]').checked=true;document.getElementById("xsplit").hidden=all;Array.prototype.forEach.call(xf.querySelectorAll('input[name="s"]'),function(x){x.checked=!all&&!!(m>>(+x.value)&1);});}
+function preview(){var pv=document.getElementById("xprev"),a=parseAmt(xf.a.value),p=payerVal(),m=splitMask();
+  if(a===null||p===null||!m){pv.textContent="";return;}
+  var sh=shares({id:"preview",a:a,s:m}),side=p<2?0:1,c=COUPLES[side],owedOwn=sh[c[0]]+sh[c[1]],net=a-owedOwn;
+  pv.textContent=net===0?"Nothing owed. It only involves "+CNAME[side]+".":CNAME[1-side]+" pay "+PEOPLE[p]+" "+mc(net)+" for this.";}
+xf.addEventListener("input",preview);
+xf.addEventListener("change",function(e){if(e.target.name==="mode"){var some=e.target.value==="some";document.getElementById("xsplit").hidden=!some;if(some)Array.prototype.forEach.call(xf.querySelectorAll('input[name="s"]'),function(x){x.checked=false;});}preview();});
+function resetForm(){setSplit(15);preview();editing=null;xf.w.value="";xf.a.value="";xerr.textContent="";xsubmit.textContent="Add expense";xcancel.hidden=true;}
 xf.d.value=today();
 var lastP=lsGet(PKEY);if(lastP!==null&&/^[0-3]$/.test(lastP))setPayer(+lastP);
 
@@ -629,7 +643,7 @@ function copyText(t,ok){
 
 function renderX(){
   var R=calcX(),cn=[R.net[0]+R.net[1],R.net[2]+R.net[3]];
-  document.getElementById("xstats").innerHTML='<div><small>Trip total</small><b>'+mc(R.total)+'</b></div><div><small>Per person</small><b>'+mc(Math.round(R.total/4))+'</b></div>';
+  document.getElementById("xstats").innerHTML='<div><small>Trip total</small><b>'+mc(R.total)+'</b></div><div><small>Items</small><b>'+R.live.length+'</b></div>';
   var st=settleLine(cn,R),sb=document.getElementById("settle");
   sb.innerHTML=!R.live.length?'<small>Settle up</small><b>Nothing logged yet</b><p>Add the first expense above.</p>':
     !st?'<small>Settle up</small><b>All square</b><p>Nobody owes anybody.</p>':
@@ -655,7 +669,7 @@ xf.addEventListener("submit",function(e){e.preventDefault();
   if(!w){xerr.textContent="Add a short description.";xf.w.focus();return;}
   if(a===null){xerr.textContent="Enter the amount as a number, like 606.40.";xf.a.focus();return;}
   if(p===null){xerr.textContent="Pick who paid.";return;}
-  if(!sm){xerr.textContent="Pick at least one person to split between.";return;}
+  if(!sm){xerr.textContent="Tick who it was for.";return;}
   xerr.textContent="";
   if(editing){var r=findX(editing);if(r){r.w=w;r.a=a;r.p=p;r.c=c;r.d=d;r.s=sm;r.t=Date.now();}toast("Saved changes");}
   else{X.push({id:uid(),w:w,a:a,p:p,c:c,d:d,s:sm,t:Date.now(),del:false});toast("Added "+mc(a)+" paid by "+PEOPLE[p]);}
@@ -663,7 +677,7 @@ xf.addEventListener("submit",function(e){e.preventDefault();
 xcancel.addEventListener("click",function(){resetForm();});
 document.getElementById("xlist").addEventListener("click",function(e){
   var b=e.target.closest("button[data-a]");if(!b)return;var r=findX(b.getAttribute("data-id"));if(!r)return;
-  if(b.getAttribute("data-a")==="edit"){editing=r.id;xf.w.value=r.w;xf.a.value=(r.a/100).toFixed(2);xf.d.value=r.d;xf.c.value=r.c;setPayer(r.p);setSplit(r.s||15);xerr.textContent="";xsubmit.textContent="Save changes";xcancel.hidden=false;xf.scrollIntoView({behavior:"smooth",block:"center"});xf.w.focus({preventScroll:true});}
+  if(b.getAttribute("data-a")==="edit"){editing=r.id;xf.w.value=r.w;xf.a.value=(r.a/100).toFixed(2);xf.d.value=r.d;xf.c.value=r.c;setPayer(r.p);setSplit(r.s||15);preview();xerr.textContent="";xsubmit.textContent="Save changes";xcancel.hidden=false;xf.scrollIntoView({behavior:"smooth",block:"center"});xf.w.focus({preventScroll:true});}
   else{r.del=true;r.t=Date.now();if(editing===r.id)resetForm();saveX();renderX();toast("Deleted "+r.w,"Undo",function(){r.del=false;r.t=Date.now();saveX();renderX();});}});
 
 function summaryText(){var R=calcX(),cn=[R.net[0]+R.net[1],R.net[2]+R.net[3]],st=settleLine(cn,R),t=["Port Macquarie, 3-5 Oct 2026: expenses","Total "+mc(R.total),""];
