@@ -352,7 +352,7 @@ details.xt ul{margin:.6rem 0 0;padding-left:1.1rem}
       <button class="btn2" type="button" id="xsum">Copy summary</button>
       <button class="btn2 warn" type="button" id="xclear">Clear all</button>
     </div>
-    <p class="fine" style="margin-top:.8rem">Saved on this device only. To sync with the others, tap <b>Copy link to share</b> and send it in the group chat: opening the link adds their expenses to yours without duplicating anything.</p>
+    <p class="fine" id="xsync" aria-live="polite" style="margin-top:.8rem">Connecting shared expenses&hellip;</p>
   </div>
 </section>
 
@@ -586,6 +586,7 @@ showDay("Saturday");
 /* Expenses: everything split equally four ways */
 var PEOPLE=["Manoj","Carol","Vignesh","Gitanjali"],COUPLES=[[0,1],[2,3]],CNAME=["Manoj & Carol","Vignesh & Gitanjali"];
 var XKEY="pm26-expenses-v1",PKEY="pm26-payer";
+var SB_URL="https://yxgdixwneprhjxzdlaqw.supabase.co",SB_KEY="sb_publishable_94nQfItNfgNZZc2P1Slb1Q_ECjCmu47",SB_TABLE="weekend_getaway_expenses";
 function lsGet(k){try{return localStorage.getItem(k);}catch(e){return null;}}
 function lsSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
 function pad(n){return n<10?"0"+n:""+n;}
@@ -594,13 +595,40 @@ function validX(r){return !!r&&typeof r.id==="string"&&r.id.length<40&&typeof r.
 function cleanX(r){return {id:r.id,w:r.w.slice(0,80),a:r.a,p:r.p,c:"Other",d:/^\d{4}-\d{2}-\d{2}$/.test(r.d||"")?r.d:today(),t:r.t,del:!!r.del,s:r.s||15};}
 var X=[];
 try{var raw=JSON.parse(lsGet(XKEY)||"[]");if(Array.isArray(raw))X=raw.filter(validX).map(cleanX);}catch(e){X=[];}
-function saveX(){lsSet(XKEY,JSON.stringify(X));}
+var cloudReady=false,syncBusy=false,syncAgain=false,syncTimer=null;
+function saveLocalX(){lsSet(XKEY,JSON.stringify(X));}
+function syncText(t){var n=document.getElementById("xsync");if(n)n.textContent=t;}
+function xRow(r){return {id:r.id,description:r.w,amount_cents:r.a,payer:r.p,category:r.c||"Other",expense_date:r.d,split_mask:r.s||15,updated_at:r.t,deleted:!!r.del};}
+function rowX(r){return cleanX({id:r.id,w:r.description,a:r.amount_cents,p:r.payer,c:r.category,d:r.expense_date,s:r.split_mask,t:Number(r.updated_at),del:r.deleted});}
+function sbFetch(path,opt){
+  opt=opt||{};opt.headers=Object.assign({apikey:SB_KEY,Authorization:"Bearer "+SB_KEY},opt.headers||{});
+  return fetch(SB_URL+"/rest/v1/"+SB_TABLE+path,opt).then(function(res){if(!res.ok)throw new Error("Sync failed ("+res.status+")");return res;});}
+function pushX(){
+  if(!X.length)return Promise.resolve();
+  return sbFetch("?on_conflict=id",{method:"POST",headers:{"Content-Type":"application/json",Prefer:"resolution=merge-duplicates,return=minimal"},body:JSON.stringify(X.map(xRow))});}
+function runSync(){
+  if(!cloudReady)return;
+  if(syncBusy){syncAgain=true;return;}
+  syncBusy=true;syncText("Saving shared expenses…");
+  pushX().then(function(){syncText("Shared expenses are up to date.");}).catch(function(){syncText("Saved on this device. Cloud sync will retry automatically.");syncAgain=true;}).then(function(){
+    syncBusy=false;if(syncAgain){syncAgain=false;clearTimeout(syncTimer);syncTimer=setTimeout(runSync,2500);}
+  });
+}
+function saveX(){saveLocalX();clearTimeout(syncTimer);syncTimer=setTimeout(runSync,120);}
 function mergeX(inc){var idx={},n=0;X.forEach(function(r,i){idx[r.id]=i;});
   inc.forEach(function(r){if(!validX(r))return;r=cleanX(r);
     if(idx[r.id]==null){X.push(r);idx[r.id]=X.length-1;if(!r.del)n++;}
     else if(r.t>X[idx[r.id]].t){X[idx[r.id]]=r;n++;}});
   return n;}
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
+function loadCloudX(){
+  syncText(cloudReady?"Checking for shared expenses…":"Loading shared expenses…");
+  return sbFetch("?select=id,description,amount_cents,payer,category,expense_date,split_mask,updated_at,deleted")
+    .then(function(res){return res.json();})
+    .then(function(rows){var remote=rows.map(rowX).filter(validX),ri={},needPush=false;remote.forEach(function(r){ri[r.id]=r;});X.forEach(function(r){if(!ri[r.id]||r.t>ri[r.id].t)needPush=true;});var n=mergeX(remote);saveLocalX();if(n)renderX();cloudReady=true;return needPush?pushX():Promise.resolve();})
+    .then(function(){syncText("Shared expenses are up to date.");})
+    .catch(function(){cloudReady=true;syncText("Saved on this device. Cloud sync will retry automatically.");});
+}
 function mc(c){var neg=c<0;c=Math.abs(c);return (neg?"-":"")+"$"+(c/100).toLocaleString("en-AU",{minimumFractionDigits:2,maximumFractionDigits:2});}
 function parseAmt(v){v=String(v).replace(/[$,\s]/g,"");if(!/^\d+(\.\d{1,2})?$/.test(v))return null;var c=Math.round(parseFloat(v)*100);return c>0&&c<1e9?c:null;}
 function hashId(id){var h=0;for(var i=0;i<id.length;i++)h=(h*31+id.charCodeAt(i))>>>0;return h;}
@@ -705,6 +733,8 @@ function importHash(){
 }
 importHash();
 window.addEventListener("hashchange",importHash);
+loadCloudX();
+setInterval(loadCloudX,10000);
 
 /* Init */
 var reduce=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
